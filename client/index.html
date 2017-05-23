@@ -1,0 +1,65 @@
+<!--index.html-->
+<canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+<button id="restartBtn" style="display:none;" onclick="restart()">RESTART</button>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+	var ctx = document.getElementById("ctx").getContext("2d");
+	//var restartBtn = document.getElementById("restartBtn");
+	ctx.font = '30px Arial';
+	var airplaneImg = new Image();
+	airplaneImg.src = "airplane.png";
+	
+	var socket = io.connect("http://31.208.226.242:2000");
+
+	socket.emit('register', {type: 'browser', id: '123'});
+		
+	socket.on('newPositions',function(data){
+		//console.log('newPositions');
+		ctx.clearRect(0,0,500,500);
+		for(var i = 0 ; i < data.player.length; i++){
+			ctx.drawImage(airplaneImg,data.player[i].x,data.player[i].y,50,50);	
+			//console.log("PLAYER MOVE");
+		}
+		for (var i = 0; i < data.enemy.length; i++) {
+			ctx.fillRect(data.enemy[i].x-5, data.enemy[i].y-5,10,10);
+		}
+				
+	});
+
+	/*
+	socket.on("gameOver", function(){
+		ctx.clearRect(0, 0, ctx.width, ctx.height);
+		$('#restartBtn').css('display', 'block');
+	});
+
+	function restart(){
+		socket.emit('restart');
+	}
+	*/
+
+	document.onkeydown = function(event){
+		if(event.keyCode === 39)	//d
+			socket.emit('keyPress',{inputId:'right',state:true});
+		else if(event.keyCode === 40)	//s
+			socket.emit('keyPress',{inputId:'down',state:true});
+		else if(event.keyCode === 37) //a
+			socket.emit('keyPress',{inputId:'left',state:true});
+		else if(event.keyCode === 38) // w
+			socket.emit('keyPress',{inputId:'up',state:true});
+			
+	}
+	document.onkeyup = function(event){
+		if(event.keyCode === 39)	//d
+			socket.emit('keyPress',{inputId:'right',state:false});
+		else if(event.keyCode === 40)	//s
+			socket.emit('keyPress',{inputId:'down',state:false});
+		else if(event.keyCode === 37) //a
+			socket.emit('keyPress',{inputId:'left',state:false});
+		else if(event.keyCode === 38) // w
+			socket.emit('keyPress',{inputId:'up',state:false});
+	}
+	
+</script>
