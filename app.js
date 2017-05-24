@@ -57,12 +57,20 @@ var Player = function(id){
         else if(self.y < 0){
             self.y = 0;
         }
+        //self.pressingRight = false;
+        //self.pressingLeft = false;
+
+
 	}
 	self.updateSpd = function(){
-        if(self.pressingRight)
+        if(self.pressingRight){
             self.spdX = self.maxSpd;
-        else if(self.pressingLeft)
+            
+        }           
+        else if(self.pressingLeft){
             self.spdX = -self.maxSpd;
+
+        }            
         else
             self.spdX = 0;
        
@@ -81,10 +89,16 @@ Player.list = {};
 Player.onConnect = function(socket){
     var player = Player(socket.id);
     socket.on('keyPress',function(data){
-        if(data.inputId === 'left')
+        if(data.inputId === 'left'){
             player.pressingLeft = data.state;
-        else if(data.inputId === 'right')
+            player.pressingRight = false;
+            //console.log(data.state);
+        }           
+        else if(data.inputId === 'right'){
             player.pressingRight = data.state;
+            player.pressingLeft = false;
+            //console.log("Right");
+        }           
         else if(data.inputId === 'up')
             player.pressingUp = data.state;
         else if(data.inputId === 'down')
@@ -190,6 +204,8 @@ function gameLoop(){
 			socket.emit('newPositions', pack);
         } 
     }
+
+   
 	
 }
 
@@ -214,7 +230,7 @@ io.sockets.on('connection', function(socket){
             game.browserSockets.push(socket);
             //console.log(game.browserSockets.length);
             activeGames[data.id] = game;
-            console.log(activeGames["123"].browserSockets.length);
+            //console.log(activeGames["123"].browserSockets.length);
             socket.id = Math.random();
             SOCKET_LIST[socket.id] = socket;
             
